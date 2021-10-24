@@ -6,6 +6,7 @@ Robots module that interprets JSON from a text file in order to provide the fina
 and bearing
 """
 
+
 class Robot:
 
     def __init__(self):
