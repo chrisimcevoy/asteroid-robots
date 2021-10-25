@@ -31,3 +31,7 @@
 {"type": "move", "movement": "move-forward"}
 {"type": "move", "movement": "move-forward"}
 {"type": "move", "movement": "move-forward"}
+{"type": "new-robot", "position": {"x": 4, "y": 4}, "bearing": "north"}
+{"type": "move", "movement": "move-forward"}
+{"type": "move", "movement": "move-forward"}
+{"type": "move", "movement": "move-forward"}

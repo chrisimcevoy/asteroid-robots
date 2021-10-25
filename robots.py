@@ -5,11 +5,11 @@ James Gough coding challenge.
 Robots module that interprets JSON from a text file in order to provide the final coordinates of the robot's position
 and bearing
 """
-import argparse
 import json
 from itertools import cycle
 import re
 import sys
+import logging
 
 class TextToDictConverter:
     """
@@ -47,25 +47,6 @@ class TextToDictConverter:
         self.read_file()
         self.convert_to_list_of_dicts()
         return self.parsed_data
-
-
-# class JSONDataValidator:
-#     """
-#     Checks for any inconsistencies in the input text such as unexpected types, movements, or positions. If any
-#     inconsistencies are found, that line is omitted and a warning is logged.
-#     """
-#     expected_values_ref = {
-#         "type": {"asteroid", "new-robot", "move"},
-#         "movement": {"turn-right", "turn-left", "move-forward"},
-#         "bearing": {"north", "east", "south", "west"}
-#     }
-#
-#     def __init__(self, parsed_data):
-#         self.parsed_data = parsed_data
-#
-#     def check_for_unexpected_data(self):
-#
-
 
 
 class Robot:
@@ -171,17 +152,26 @@ class Asteroid:
 
         self.robot_final_positions_list = []
 
+        self.asteroid_boundary_warning = False
+
     def construct_asteroid_boundary(self):
         self.asteroid_boundary = {
             "x": {"max": self.asteroid_size_x, "min": self.asteroid_size_x * -1},
             "y": {"max": self.asteroid_size_y, "min": self.asteroid_size_y * -1}
         }
 
+    def check_robot_within_boundary(self, _x, _y):
+        if any([
+            abs(_x) > self.asteroid_size_x,
+            abs(_y) > self.asteroid_size_y
+        ]):
+            self.asteroid_boundary_warning = True
+
 
 class AsteroidRobotDataParser:
 
-    def __init__(self, file_name):
-        self.file_name = file_name
+    def __init__(self, _file_name):
+        self.file_name = _file_name
 
         self.converted_data = []
 
@@ -189,6 +179,8 @@ class AsteroidRobotDataParser:
         self.current_robot = None
 
         self.robot_output_data = []
+
+        self.boundary_warning = False
 
     def convert_text_to_dict(self):
         text_to_dict = TextToDictConverter(self.file_name)
@@ -209,6 +201,11 @@ class AsteroidRobotDataParser:
             self.initialise_new_robot(data_line)
         elif data_type == "move":
             self.current_robot.update_movement(data_line)
+            self.current_asteroid.check_robot_within_boundary(self.current_robot.x, self.current_robot.y)
+            if self.current_asteroid.asteroid_boundary_warning:
+                logging.warning(f"""Robot has gone beyond the bounds of the asteroid! 
+                Current coordinates are: {self.current_robot.x}, {self.current_robot.y}
+                """)
 
     def print_out_robot_output_data(self):
         for data in self.robot_output_data:
