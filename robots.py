@@ -11,13 +11,14 @@ import re
 import sys
 import logging
 
+
 class TextToDictConverter:
     """
     Extracts the instructions from the .txt file and converts them to valid Python dictionaries.
     """
 
-    def __init__(self, file_name: str):
-        self.file_name = file_name
+    def __init__(self, _file_name: str):
+        self.file_name = _file_name
 
         self.json_text = None
         self.parsed_data = {}
