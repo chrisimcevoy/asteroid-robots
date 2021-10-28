@@ -12,7 +12,7 @@ import sys
 import logging
 
 
-class TextToDictConverter:
+class JSONReader:
     """
     Extracts the instructions from the .txt file and converts them to valid Python dictionaries.
     """
@@ -20,34 +20,17 @@ class TextToDictConverter:
     def __init__(self, _file_name: str):
         self.file_name = _file_name
 
-        self.json_text = None
-        self.parsed_data = {}
+        self.parsed_line = {}
 
-    def read_file(self):
+    def create_json_iterator(self):
         """
         Simply reads the input text file as a string.
         :return:
         """
         with open(self.file_name) as file:
-            self.json_text = file.read()
-
-    def convert_to_list_of_dicts(self):
-        """
-        Converts the list of json strings into dictionaries.
-        :return:
-        """
-        self.json_text = self.json_text.split("\n")
-        self.json_text = [i for i in self.json_text if i]
-        self.parsed_data = [json.loads(i) for i in self.json_text]
-
-    def convert_file_to_json(self):
-        """
-        Runs all class methods and outputs parsed data.
-        :return:
-        """
-        self.read_file()
-        self.convert_to_list_of_dicts()
-        return self.parsed_data
+            for line in file:
+                self.parsed_line = json.loads(line)
+                yield self.parsed_line
 
 
 class Robot:
@@ -173,51 +156,54 @@ class AsteroidRobotDataParser:
 
     def __init__(self, _file_name):
         self.file_name = _file_name
-
-        self.converted_data = []
+        self.json_iterator = JSONReader(file_name).create_json_iterator()
 
         self.current_asteroid = None
         self.current_robot = None
 
-        self.robot_output_data = []
+        self.current_data_line = None
+        self.data_type_parser = dict()
 
         self.boundary_warning = False
 
-    def convert_text_to_dict(self):
-        text_to_dict = TextToDictConverter(self.file_name)
-        self.converted_data = text_to_dict.convert_file_to_json()
+    def make_data_type_parser(self):
+        self.data_type_parser = {
+            "asteroid": self.parse_type_asteroid,
+            "new-robot": self.parse_type_robot,
+            "move": self.parse_type_move
+        }
 
-    def initialise_new_robot(self, data_line):
-        self.current_robot = Robot(data_line)
+    def parse_type_asteroid(self):
+        self.current_asteroid = Asteroid(self.current_data_line)
+
+    def print_final_position(self):
+        if self.current_robot:
+            print(self.current_robot.provide_final_position())
+
+    def parse_type_robot(self):
+        self.print_final_position()
+        self.current_robot = Robot(self.current_data_line)
         self.current_robot.add_initial_data()
         self.current_robot.cycle_to_initial_bearing_num()
 
-    def parse_data(self, data_line):
-        data_type = data_line["type"]
-        if data_type == "asteroid":
-            self.current_asteroid = Asteroid(data_line)
-        elif data_type == "new-robot":
-            if self.current_robot:
-                self.robot_output_data.append(self.current_robot.provide_final_position())
-            self.initialise_new_robot(data_line)
-        elif data_type == "move":
-            self.current_robot.update_movement(data_line)
-            self.current_asteroid.check_robot_within_boundary(self.current_robot.x, self.current_robot.y)
-            if self.current_asteroid.asteroid_boundary_warning:
-                logging.warning(f"""Robot has gone beyond the bounds of the asteroid! 
+    def parse_type_move(self):
+        self.current_robot.update_movement(self.current_data_line)
+        self.current_asteroid.check_robot_within_boundary(self.current_robot.x, self.current_robot.y)
+        if self.current_asteroid.asteroid_boundary_warning:
+            logging.warning(f"""Robot has gone beyond the bounds of the asteroid! 
                 Current coordinates are: {self.current_robot.x}, {self.current_robot.y}
                 """)
 
-    def print_out_robot_output_data(self):
-        for data in self.robot_output_data:
-            print(data)
+    def parse_data_line_by_type(self):
+        self.make_data_type_parser()
+        data_type = self.current_data_line["type"]
+        self.data_type_parser[data_type]()
 
     def run_data_parser(self):
-        self.convert_text_to_dict()
-        for data_line in self.converted_data:
-            self.parse_data(data_line)
-        self.robot_output_data.append(self.current_robot.provide_final_position())
-        self.print_out_robot_output_data()
+        for data_line in self.json_iterator:
+            self.current_data_line = data_line
+            self.parse_data_line_by_type()
+        self.print_final_position()
 
 
 if __name__ == "__main__":

@@ -25,14 +25,14 @@ SAMPLE_ASTEROID = {'type': 'asteroid', 'size': {'x': 10, 'y': 20}}
 
 def test_read_file():
     text_to_dict = robots.TextToDictConverter(TEST_TXT_FILE)
-    text_to_dict.read_file()
+    text_to_dict.create_json_iterator()
 
     assert isinstance(text_to_dict.json_text, str)
 
 
 def test_convert_to_list_of_dicts():
     text_to_dict = robots.TextToDictConverter(TEST_TXT_FILE)
-    text_to_dict.read_file()
+    text_to_dict.create_json_iterator()
     text_to_dict.convert_to_list_of_dicts()
 
     other_than_dict = [i for i in text_to_dict.parsed_data if not isinstance(i, dict)]

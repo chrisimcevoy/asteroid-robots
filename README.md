@@ -3,7 +3,7 @@
 
 ## Introduction
 
-HI! Thanks for applying to join Black Cow Technology. As part of the process we'd like you to complete this short take-home task. It shouldn't take very long, certainly not more than a few hours.
+HI! Thanks for applying to join _company_. As part of the process we'd like you to complete this short take-home task. It shouldn't take very long, certainly not more than a few hours.
 
 Please treat this task as though it were a real project and do everything just as you normally would (think source control).
 
