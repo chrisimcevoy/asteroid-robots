@@ -22,21 +22,18 @@ SAMPLE_FINAL_POSITION = [{"type": "new-robot", "position": {"x": 1, "y": 2}, "be
 SAMPLE_ASTEROID = {'type': 'asteroid', 'size': {'x': 10, 'y': 20}}
 
 
-
 def test_read_file():
-    text_to_dict = robots.TextToDictConverter(TEST_TXT_FILE)
-    text_to_dict.create_json_iterator()
+    json_reader = robots.JSONReader(TEST_TXT_FILE)
+    json_iterator = json_reader.create_json_iterator()
 
-    assert isinstance(text_to_dict.json_text, str)
+    assert next(json_iterator) == {"type": "asteroid", "size": {"x": 5, "y": 5}}
 
 
-def test_convert_to_list_of_dicts():
-    text_to_dict = robots.TextToDictConverter(TEST_TXT_FILE)
-    text_to_dict.create_json_iterator()
-    text_to_dict.convert_to_list_of_dicts()
+def test_converted_json():
+    json_reader = robots.JSONReader(TEST_TXT_FILE)
+    json_iterator = json_reader.create_json_iterator()
 
-    other_than_dict = [i for i in text_to_dict.parsed_data if not isinstance(i, dict)]
-    assert not other_than_dict
+    assert len(set(type(i) for i in json_iterator)) == 1
 
 
 def test_add_initial_data():
@@ -139,12 +136,4 @@ def test_construct_asteroid_boundary():
     }
 
 
-def test_run_data_parser():
-    data_parser = robots.AsteroidRobotDataParser(TEST_TXT_FILE)
-    data_parser.run_data_parser()
-    assert data_parser.robot_output_data == [
-        {'type': 'robot', 'position': {'x': 1, 'y': 3}, 'bearing': 'north'},
-        {'type': 'robot', 'position': {'x': 5, 'y': 1}, 'bearing': 'east'},
-        {'type': 'robot', 'position': {'x': 2, 'y': 6}, 'bearing': 'south'},
-        {'type': 'robot', 'position': {'x': -3, 'y': 0}, 'bearing': 'west'}
-    ]
+
