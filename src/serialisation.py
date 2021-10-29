@@ -7,8 +7,16 @@ from marshmallow import Schema, fields as f, post_load
 from marshmallow_enum import EnumField
 from marshmallow_oneofschema import OneOfSchema
 
-from dto import Coordinates, BearingType, NewRobotMessage, MessageType, MoveMessage, AsteroidMessage, MovementType, \
-    RobotMessage
+from dto import (
+    Coordinates,
+    BearingType,
+    NewRobotMessage,
+    MessageType,
+    MoveMessage,
+    AsteroidMessage,
+    MovementType,
+    RobotMessage,
+)
 
 
 class BaseSchema(Schema):
