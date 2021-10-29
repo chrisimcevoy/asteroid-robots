@@ -5,7 +5,12 @@ from uuid import uuid4
 import pytest
 
 from dto import Coordinates, MovementType, BearingType
-from robots import Asteroid, Robot, validate_instructions_file_path
+from robots import Asteroid, Robot, validate_instructions_file_path, process_instructions
+
+ASTEROID_MSG = '{"type": "asteroid", "size": {"x": 5, "y": 5}}'
+NEW_ROBOT_MSG = '{"type": "new-robot", "position": {"x": 1, "y": 2}, "bearing": "north"}'
+MOVE_MESSAGE = '{"type": "move", "movement": "turn-left"}'
+ROBOT_MSG = '{"type": "robot", "position": {"x": 1, "y": 3}, "bearing": "north"}'
 
 
 @contextmanager
@@ -41,7 +46,6 @@ class TestAsteroid:
 
 
 class TestRobot:
-
     origin = Coordinates(0, 0)
 
     def assert_is_origin(self, coordinates: Coordinates) -> None:
@@ -83,3 +87,14 @@ class TestRobot:
         robot.move(MovementType.Forward)
         assert getattr(robot.position, attr) == expected
         assert robot.bearing == initial_bearing
+
+
+@pytest.mark.parametrize('path,expectation', [
+    ((ASTEROID_MSG, NEW_ROBOT_MSG, MOVE_MESSAGE), does_not_raise()),
+    ((ASTEROID_MSG, MOVE_MESSAGE), pytest.raises(ValueError)),
+    ((NEW_ROBOT_MSG,), pytest.raises(ValueError)),
+    ((MOVE_MESSAGE,), pytest.raises(ValueError)),
+], indirect=['path'])
+def test_process_instructions_enforces_instruction_order(path: Path, expectation) -> None:
+    with expectation:
+        process_instructions(path)

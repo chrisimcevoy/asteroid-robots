@@ -84,7 +84,7 @@ class Robot:
         return RobotMessage(self.position, self.bearing)
 
 
-def broadcast_position(robot: Robot | None) -> None:
+def broadcast_message(robot: Robot | None) -> None:
     """Broadcast the position of a Robot, if it exists."""
     if robot:
         msg = robot.generate_message()
@@ -108,17 +108,21 @@ def process_instructions(instructions_file_path: Path) -> None:
                     asteroid = Asteroid(message.size)
                 case NewRobotMessage():
                     if not asteroid:
-                        raise ValueError(f'Asteroid message must arrive first!')
-                    broadcast_position(robot)
+                        raise ValueError('Cannot create a Robot before the asteroid is mapped!')
+                    broadcast_message(robot)
                     robot = Robot(message.position, message.bearing)
                 case MoveMessage():
+                    if not asteroid:
+                        raise ValueError('Cannot process a movement before the asteroid has been mapped!')
+                    if not robot:
+                        raise ValueError(f'Cannot process a movement before the robot arrives!')
                     robot.move(message.movement)
                     if not asteroid.contains(robot.position):
                         raise RuntimeError(f"Robot wandered off the grid! :(")
                 case _:
                     raise ValueError(f'Invalid instruction type: {message}')
 
-        broadcast_position(robot)
+        broadcast_message(robot)
 
 
 def main():
