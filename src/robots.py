@@ -6,7 +6,15 @@ from pathlib import Path
 
 import marshmallow.exceptions
 
-from dto import Coordinates, BearingType, AsteroidMessage, NewRobotMessage, MoveMessage, RobotMessage, MovementType
+from dto import (
+    Coordinates,
+    BearingType,
+    AsteroidMessage,
+    NewRobotMessage,
+    MoveMessage,
+    RobotMessage,
+    MovementType,
+)
 from serialisation import deserialise_message, serialise_message
 
 TURN_RIGHT_MAP: dict[BearingType, BearingType] = {
