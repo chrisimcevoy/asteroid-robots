@@ -117,7 +117,7 @@ def main():
     """Validate arguments and kick off instruction processing."""
     try:
         path: str = sys.argv[1]
-    except KeyError:
+    except IndexError:
         raise ValueError(f'Instructions file path not provided!') from None
 
     path: Path = validate_instructions_file_path(Path(path))
